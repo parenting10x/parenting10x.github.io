@@ -1,0 +1,1 @@
+.\main.exe ../md_files/ ../
