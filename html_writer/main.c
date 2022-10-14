@@ -126,16 +126,7 @@ static void writeNavBar(FileState *state) {
 	char *text = "<nav class=\"navbar navbar-default\" style=\"background-color: white; color: #f5f6f7;\">\
 	  <div class=\"container\">\
 	    <div class=\"navbar-header\">\
-	      <button type=\"button\" class=\"navbar-toggle\" data-toggle=\"collapse\" data-target=\"#myNavbar\">\
-	        <span class=\"icon-bar\"></span>\
-	        <span class=\"icon-bar\"></span>\
-	        <span class=\"icon-bar\"></span>\
-	      </button>\
 	      <a class=\"navbar-left\" href=\"./index.html#\"><img style=\"width: 3cm;\" src=\"./photos/logo.png\"></a>\
-	    </div>\
-	    <div class=\"collapse navbar-collapse\" id=\"myNavbar\">\
-	      <ul class=\"nav navbar-nav navbar-right\"  style=\"margin-top: 25px;\">\
-	      </ul>\
 	    </div>\
 	  </div>\
 	</nav>\
@@ -401,6 +392,7 @@ int main(int argc, char **args) {
 
 			bool inCodeBlock = false;
 			bool wasNewLine = false;
+			bool inHtmlBlock = false;
 
 			int depthInFunction = 0;
 			
@@ -411,7 +403,14 @@ int main(int argc, char **args) {
 				// printf("%s\n", at);
 				if(false) {
 					//NOTE(ollie): Just to make it look nicer with all else ifs
-
+				} else if(inHtmlBlock) {
+					if(stringsMatchNullN("#ENDHTML", at, 8)) {
+						inHtmlBlock = false;
+						at += 8;
+					} else {
+						writeText_(&state, at, 1);
+						at++;
+					}
 				} else if(inCodeBlock) {
 					if(stringsMatchNullN("#ENDCODE", at, 8)) {
 						inCodeBlock = false;
@@ -650,6 +649,12 @@ int main(int argc, char **args) {
 					// 	}
 					// 	at++;
 					// }
+				} else if(stringsMatchNullN("#HTML", at, 5)) {
+					inHtmlBlock = true;
+					at += 5;
+				} else if(stringsMatchNullN("#ENDHTML", at, 8)) {
+					inHtmlBlock = false;
+					at += 8;
 
 				} else if(stringsMatchNullN("#CARD", at, 5)) { //NOTE(ollie): paragraph
 					at += 5;
